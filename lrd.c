@@ -23,27 +23,26 @@
 #pragma config OSC = HS                 // Configure Oscilitator
 #pragma config PWRT = OFF
 
-void init_LCD(void);     //Function to initialise the LCD 
-void LCD_command(unsigned char cmd); //Function to pass command to the LCD
-void LCD_data(unsigned char data);  //Function to write character to the LCD
-void LCD_write_string(static char *str);//Function to write string to the LCD
+void lcd_init(void);     //Function to initialise the LCD 
+void lcd_order(unsigned char cmd); //Function to pass command to the LCD
+void lcd_char(unsigned char data);  //Function to write character to the LCD
+void lcd_write(static char *str);//Function to write string to the LCD
 void msdelay (unsigned int time);  //Function to generate delay
 
-unsigned int Get_ADC_Result(void);  //Function to Get ADC result after conversion
-void Start_Conversion(void);   //Function to Start of Conversion
+unsigned int adcresultget(void);  //Function to Get ADC result after conversion
+void convertgo(void);   //Function to Start of Conversion
 
-void ADC_Init(void);     //Function to initialize the ADC
-void ADC_Init1(void);     //Function to initialize the ADC
-void ADC_Init2(void);     //Function to initialize the ADC
+void init_adc0(void);     //Function to initialize the ADC
+void init_adc1(void);     //Function to initialize the ADC
 
 void main()
 {
-    char msg2[] = "Temp:";
-    char msg3[] = "made by asmy.dev";
-    unsigned char i, Thousands,Hundreds,Tens,Ones;
+    char info[] = "temp:";
+    char info2[] = "made by asmy.dev";
+    unsigned char i, thousands,hundreds,tens,ones;
     unsigned int adc_val, k=0,adc_val11;
-    unsigned long Voltage, adc_val3;
-    float Voltage1, adc_val1,adc_val2;
+    unsigned long volt, adc_val3;
+    float v1, adc_val1,adc_val2;
     int result,m, j;
     float mV, Temp, Press;
     unsigned int speed;
@@ -68,62 +67,62 @@ void main()
 
     ADCON1 = 0x0F;        //Configuring the PORTE pins as digital I/O
 
-    ADC_Init();    // Init ADC peripheral
-    init_LCD();    // Init LCD Module
-    LCD_command (0x8F);   // Goto First line, 16th place of LCD
-    msdelay(15);
-    LCD_command (0x07);   // Display shift left
+    init_adc0();    // Init ADC peripheral
+    lcd_init();    // Init LCD Module
+    lcd_order (0x8F);   // Goto First line, 16th place of LCD
+    msdelay(1);
+    lcd_order (0x07);   // Display shift left
 
     while (1)
     {
 
         if(k==0) {
 
-            ADC_Init();               // Init ADC peripheral
-            LCD_command(0x01);      // clear LCD
-            msdelay(15);
-            LCD_command(0x06);      // Shift curser right
-            msdelay(15);
-            LCD_command (0x80);   // Goto first line, 0th place of LCD
-            LCD_write_string(msg2); // Display Message
-            Start_Conversion();   //Trigger conversion
-            adc_val= Get_ADC_Result();//Get the ADC output by polling GO bit
+            init_adc0();               // Init ADC peripheral
+            lcd_order(0x01);      // clear LCD
+            msdelay(1);
+            lcd_order(0x06);      // Shift curser right
+            msdelay(1);
+            lcd_order (0x80);   // Goto first line, 0th place of LCD
+            lcd_write(info); // Display Message
+            convertgo();   //Trigger conversion
+            adc_val= adcresultget();//Get the ADC output by polling GO bit
             
-            Voltage = (long) adc_val*500.0; //Convert Binary result into temperature
-            adc_val = Voltage /1024.0;  
-            LCD_command (0x85);   //Goto 5th place on first line of LCD
-            i = adc_val/100 ;///Get the Hundreds place
-            Hundreds = i + 0x30;  // Convert it to ASCII
-            LCD_data (Hundreds);  //Display Hundreds place
+            volt = (long) adc_val*500.0; //Convert Binary result into temperature
+            adc_val = volt /1024.0;  
+            lcd_order (0x85);   //Goto 5th place on first line of LCD
+            i = adc_val/100 ;///Get the hundreds place
+            hundreds = i + 0x30;  // Convert it to ASCII
+            lcd_char (hundreds);  //Display hundreds place
             
 
-            i = ((adc_val)%100)/10; //Get the Tens place
-            Tens = i + 0x30;   // Convert it to ASCII
-            LCD_data (Tens);   //Display Tens place
+            i = ((adc_val)%100)/10; //Get the tens place
+            tens = i + 0x30;   // Convert it to ASCII
+            lcd_char (tens);   //Display tens place
 
-            i = adc_val%10 ;   //Get the Ones place
-            Ones = i + 30;    // Convert it to ASCII
+            i = adc_val%10 ;   //Get the ones place
+            ones = i + 30;    // Convert it to ASCII
 
-            LCD_data (i + 0x30);  //Display Ones place
-            LCD_data ('.'); // Display decimal point
-            LCD_data ('0'); // Display 0 digit
-            LCD_data (' '); //
-            LCD_data ('C'); //
-            LCD_data ('e'); //
-            LCD_data ('l'); //
-            LCD_data ('s'); //
-            LCD_data ('.'); //
+            lcd_char (i + 0x30);  //Display ones place
+            lcd_char ('.'); // Display decimal point
+            lcd_char ('0'); // Display 0 digit
+            lcd_char (' '); //
+            lcd_char ('C'); //
+            lcd_char ('e'); //
+            lcd_char ('l'); //
+            lcd_char ('s'); //
+            lcd_char ('.'); //
             k=1;
             msdelay(300);  //Delay between conversions.
 
         } else if (k == 1) {
         
-            ADC_Init1();    // Init ADC peripheral
-            LCD_command (0xC0);   // Goto second line, 0th place of LCD
-            LCD_write_string(msg3); // Display Message
-            Start_Conversion();   //Trigger conversion
+            init_adc1();    // Init ADC peripheral
+            lcd_order (0xC0);   // Goto second line, 0th place of LCD
+            lcd_write(info2); // Display Message
+            convertgo();   //Trigger conversion
 
-                result = Get_ADC_Result();  // Get the humidity
+                result = adcresultget();  // Get the humidity
             if (result > 300 && result <800)
             {
             
@@ -135,27 +134,27 @@ void main()
                 // do something
             }
 
-            LCD_command (0xC9);   //Goto 9th place on second line of LCD
+            lcd_order (0xC9);   //Goto 9th place on second line of LCD
             i = result/1000 ;  //Get the thousands place
-            Thousands = i + 0x30;  // Convert it to ASCII
-            LCD_data (Thousands); // Display thousands place
+            thousands = i + 0x30;  // Convert it to ASCII
+            lcd_char (thousands); // Display thousands place
             
-            i = (result%1000)/100; //Get the Hundreds place
-            Hundreds = i + 0x30;  // Convert it to ASCII
-            LCD_data (Hundreds);  //Display Hundreds place
+            i = (result%1000)/100; //Get the hundreds place
+            hundreds = i + 0x30;  // Convert it to ASCII
+            lcd_char (hundreds);  //Display hundreds place
             
-            i = (result%100)/10; //Get the Tens place
-            Tens = i + 0x30;   // Convert it to ASCII
-            LCD_data (Tens);   //Display Tens place
+            i = (result%100)/10; //Get the tens place
+            tens = i + 0x30;   // Convert it to ASCII
+            lcd_char (tens);   //Display tens place
             
 
-            i = result%10 ;   //Get the Ones place
-            Ones = i + 30;    // Convert it to ASCII
-            LCD_data (i + 0x30);  //Display Ones place
+            i = result%10 ;   //Get the ones place
+            ones = i + 30;    // Convert it to ASCII
+            lcd_char (i + 0x30);  //Display ones place
 
-            LCD_data ('d'); // Display d
-            LCD_data ('e'); // Display e
-            LCD_data ('c'); // Display c
+            lcd_char ('d'); // Display d
+            lcd_char ('e'); // Display e
+            lcd_char ('c'); // Display c
 
             k=0;
             msdelay(300);
@@ -191,7 +190,7 @@ void main()
     }
 }
 
-void ADC_Init()
+void init_adc0()
 {
 ADCON0=0b00000000; //A/D Module is OFF and Channel 0 is selected
 ADCON1=0b00001110; // Reference as VDD & VSS, AN0 set as analog pins
@@ -199,7 +198,7 @@ ADCON2=0b10001110; // Result is right Justified, 2TAD, FOSC/64
 ADCON0bits.ADON=1; //Turn ON ADC module
 }
 
-void ADC_Init1()
+void init_adc1()
 {
 ADCON0=0b00000100; //A/D Module is OFF and Channel 1 is selected
 ADCON1=0b00001101; // Reference as VDD & VSS, AN1 set as analog pins
@@ -207,12 +206,12 @@ ADCON2=0b10001110; // Result is right Justified, 2TAD, FOSC/64
 ADCON0bits.ADON=1; //Turn ON ADC module
 }
 
-void Start_Conversion()
+void convertgo()
 {
  ADCON0bits.GO=1;
 }
 
-unsigned int Get_ADC_Result()
+unsigned int adcresultget()
 {
 unsigned int ADC_Result=0;
 while(ADCON0bits.DONE);
@@ -228,19 +227,19 @@ for (i = 0; i < time; i++)
 for (j = 0; j < 710; j++);  //Calibrated for a 1 ms delay in MPLAB
 }
 
-void init_LCD(void)         // Function to initialise the LCD
+void lcd_init(void)         // Function to initialise the LCD
 {
-    LCD_command(0x38);      // initialization of 16X2 LCD in 8bit mode
-    msdelay(15);
-    LCD_command(0x01);      // clear LCD
-    msdelay(15);
-    LCD_command(0x0C);      // cursor off
-    msdelay(15);
-    LCD_command(0x06);      // curser right shift
-    msdelay(15);
+    lcd_order(0x38);      // initialization of 16X2 LCD in 8bit mode
+    msdelay(1);
+    lcd_order(0x01);      // clear LCD
+    msdelay(1);
+    lcd_order(0x0C);      // cursor off
+    msdelay(1);
+    lcd_order(0x06);      // curser right shift
+    msdelay(1);
 }
 
-void LCD_command(unsigned char cmd) //Function to pass command to the LCD
+void lcd_order(unsigned char cmd) //Function to pass command to the LCD
 {
     LCD_DATA = cmd;  //Send data on LCD data bus
     rs = 0;    //RS = 0 since command to LCD
@@ -250,7 +249,7 @@ void LCD_command(unsigned char cmd) //Function to pass command to the LCD
     en = 0;
 }
 
-void LCD_data(unsigned char data)//Function to write data to the LCD
+void lcd_char(unsigned char data)//Function to write data to the LCD
 {
     LCD_DATA = data; //Send data on LCD data bus
     rs = 1;    //RS = 1 since data to LCD
@@ -260,15 +259,15 @@ void LCD_data(unsigned char data)//Function to write data to the LCD
     en = 0;
 }
 //Function to write string to LCD
-void LCD_write_string(static char *str)   
+void lcd_write(static char *str)   
 {
    int i = 0;
    while (str[i] != 0)
     {
-    LCD_data(str[i]);      // sending data on LCD byte by byte
+    lcd_char(str[i]);      // sending data on LCD byte by byte
     msdelay(1);
     i++;
     }
 }
 
-// © Ahmad Siraj MY 2020
+/* © Ahmad Siraj MY 2020 */
