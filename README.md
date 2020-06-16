@@ -1,4 +1,4 @@
-# le rona destroyer
+# So Selesa
 Automatic Hand Sanitizer Dispenser using PIC18F Microcontroller
 
 * Programming Language: C
