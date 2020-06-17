@@ -33,17 +33,15 @@ unsigned int adcresultget(void);  //Function to Get ADC result after conversion
 void convertgo(void);   //Function to Start of Conversion
 
 void init_adc0(void);     //Function to initialize the ADC
-void init_adc1(void);     //Function to initialize the ADC
 
 void main()
 {
     char info[] = "temp:";
     char info2[] = "made by asmy.dev";
     unsigned char i, thousands,hundreds,tens,ones;
-    unsigned int adc_val, k=0,adc_val11;
-    unsigned long volt, adc_val3;
-    float v1, adc_val1,adc_val2;
-    int result,m, j;
+    unsigned int adc_val, k=0;
+    unsigned long volt;
+    int j;
     unsigned int Temp;
     unsigned int speed;
        
@@ -192,14 +190,6 @@ void init_adc0()
 {
 ADCON0=0b00000000; //A/D Module is OFF and Channel 0 is selected
 ADCON1=0b00001110; // Reference as VDD & VSS, AN0 set as analog pins
-ADCON2=0b10001110; // Result is right Justified, 2TAD, FOSC/64
-ADCON0bits.ADON=1; //Turn ON ADC module
-}
-
-void init_adc1()
-{
-ADCON0=0b00000100; //A/D Module is OFF and Channel 1 is selected
-ADCON1=0b00001101; // Reference as VDD & VSS, AN1 set as analog pins
 ADCON2=0b10001110; // Result is right Justified, 2TAD, FOSC/64
 ADCON0bits.ADON=1; //Turn ON ADC module
 }
