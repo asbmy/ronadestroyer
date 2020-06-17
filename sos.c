@@ -44,14 +44,21 @@ void main()
     unsigned long volt, adc_val3;
     float v1, adc_val1,adc_val2;
     int result,m, j;
-    float mV, Temp, Press;
+    unsigned int Temp;
     unsigned int speed;
-
-    while (s1 == 0);
+       
+    TRISCbits.TRISC0 = 0;       // RA0 is input
+    TRISCbits.TRISC1 = 0;       // RA1 is input
+    
+    PORTCbits.RC0=1;		// RC0 OUT
+    PORTCbits.RC1=0;		// RC1 IN
+       
+    
+    TRISCbits.TRISC3 = 0;       // RC3 is input
+    TRISCbits.TRISC4 = 0;       // RC4 is input
+    TRISCbits.TRISC5 = 0;       // RC5 is input
 
     TRISB = 1;                  // ALL PORT B Input
-
-    TRISC = 0;                  // ALL Port C Output
     TRISE = 0;                  // ALL PORT E Output
     TRISD = 0;                  // ALL PORT D Output
 
@@ -87,9 +94,12 @@ void main()
             lcd_write(info); // Display Message
             convertgo();   //Trigger conversion
             adc_val= adcresultget();//Get the ADC output by polling GO bit
-            
-            volt = (long) adc_val*500.0; //Convert Binary result into temperature
-            adc_val = volt /1024.0;  
+            volt = (long) adc_val*500.0; //Convert Binary result
+
+            adc_val = volt /1024.0; // Dout
+
+            Temp = adc_val*10;
+
             lcd_order (0x85);   //Goto 5th place on first line of LCD
             i = adc_val/100 ;///Get the hundreds place
             hundreds = i + 0x30;  // Convert it to ASCII
@@ -116,71 +126,59 @@ void main()
             msdelay(300);  //Delay between conversions.
 
         } else if (k == 1) {
-        
-            init_adc1();    // Init ADC peripheral
             lcd_order (0xC0);   // Goto second line, 0th place of LCD
             lcd_write(info2); // Display Message
-            convertgo();   //Trigger conversion
-
-                result = adcresultget();  // Get the humidity
-            if (result > 300 && result <800)
-            {
-            
-                // do something
-
-            }
-            else
-            {
-                // do something
-            }
-
-            lcd_order (0xC9);   //Goto 9th place on second line of LCD
-            i = result/1000 ;  //Get the thousands place
-            thousands = i + 0x30;  // Convert it to ASCII
-            lcd_char (thousands); // Display thousands place
-            
-            i = (result%1000)/100; //Get the hundreds place
-            hundreds = i + 0x30;  // Convert it to ASCII
-            lcd_char (hundreds);  //Display hundreds place
-            
-            i = (result%100)/10; //Get the tens place
-            tens = i + 0x30;   // Convert it to ASCII
-            lcd_char (tens);   //Display tens place
-            
-
-            i = result%10 ;   //Get the ones place
-            ones = i + 30;    // Convert it to ASCII
-            lcd_char (i + 0x30);  //Display ones place
-
-            lcd_char ('d'); // Display d
-            lcd_char ('e'); // Display e
-            lcd_char ('c'); // Display c
-
+            msdelay(2);
             k=0;
-            msdelay(300);
         }
         
 		PORTDbits.RD0 = 1;
 
-        if ( s2 != 0)
-        {   
-            gled = 1;
-            yled = 0;
-            rled = 0;
-            speed = 62;
-        } else if (s3 != 0)
+        if ( s1 == 1 )
         {
-            gled = 0;
-            yled = 1;
-            rled = 0;
-            speed = 124;
-        } else if (s4 != 0)
+                if ( s2 != 0)
+            {   
+                gled = 1;
+                yled = 0;
+                rled = 0;
+                speed = 62;
+            } else if (s3 != 0)
+            {
+                gled = 0;
+                yled = 1;
+                rled = 0;
+                speed = 124;
+            } else if (s4 != 0)
+            {
+                gled = 0;
+                yled = 0;
+                rled = 1;
+                speed = 186;
+            } 
+        } else
         {
-            gled = 0;
-            yled = 0;
-            rled = 1;
-            speed = 186;
-        } 
+                if ( Temp < 230 ) // calculate temperature and go low if below 23
+            {   
+                gled = 1;
+                yled = 0;
+                rled = 0;
+                speed = 62;
+            } else if ( Temp < 260 ) // calculate temperature and go medium if below 26
+            {
+                gled = 0;
+                yled = 1;
+                rled = 0;
+                speed = 124;
+            } else if ( Temp > 270 ) // calculate temperature and go high if above 27
+            {
+                gled = 0;
+                yled = 0;
+                rled = 1;
+                speed = 186;
+            } 
+        }
+        
+        
 
     CCPR1L = speed;				    // CCPR1L value - 75% = 186, 50% = 124, 25% = 62	
     CCP1CON = 0x1C;			        // PWM Mode, 0b01 for 					// DC1B1:DC1B0
