@@ -1,6 +1,8 @@
 # So Selesa
 Automatic Speed Fan using PIC18F Microcontroller
 
+![](docs/soskema.png)
+
 * Programming Language: C
 * Microcontroller: PIC18F4580 
 * Tools: Proteus Design Suite
@@ -22,6 +24,18 @@ Standing fans may pose danger to children in the day care facility, therefore th
 
 * The project will be a small prototype with PIC18F4580 simulated virtually
 * The smart fan will be designed with Autodesk Inventor 2020
+
+### Flow Chart
+
+![](docs/soflow.png)
+
+### Block Diagram
+
+![](docs/soblock.png)
+
+### Product Design
+
+![](docs/soselesa.png)
 
 
 © Ahmad Siraj MY 2020
